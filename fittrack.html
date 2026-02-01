@@ -1,0 +1,3776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitTrack v2.0 Phase 2 - Suivi Sportif Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Space Grotesk', 'Arial Black', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    
+    #root {
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary, rgba(0, 255, 163, 0.5));
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary, rgba(0, 255, 163, 0.7));
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none !important;
+      border-color: var(--primary, #00FFA3) !important;
+      box-shadow: 0 0 0 3px var(--primary-alpha, rgba(0, 255, 163, 0.2)) !important;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ============================================
+    // THÈMES
+    // ============================================
+
+    const THEMES = {
+      neon: {
+        name: 'Néon',
+        bgPrimary: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+        bgSecondary: 'rgba(255, 255, 255, 0.08)',
+        bgTertiary: 'rgba(255, 255, 255, 0.05)',
+        textPrimary: '#fff',
+        textSecondary: '#aaa',
+        primary: '#00FFA3',
+        primaryAlpha: 'rgba(0, 255, 163, 0.2)',
+        secondary: '#FFD600',
+        secondaryAlpha: 'rgba(255, 214, 0, 0.2)',
+        danger: '#FF3B30',
+        dangerAlpha: 'rgba(255, 59, 48, 0.2)',
+        borderPrimary: 'rgba(255, 255, 255, 0.1)',
+        borderSecondary: 'rgba(255, 255, 255, 0.2)',
+        gradient1: 'rgba(255, 59, 48, 0.15)',
+        gradient2: 'rgba(0, 255, 163, 0.15)',
+        gradient3: 'rgba(255, 214, 0, 0.1)'
+      },
+      classic: {
+        name: 'Classique',
+        bgPrimary: 'linear-gradient(135deg, #1e3a5f 0%, #2c5f8d 100%)',
+        bgSecondary: 'rgba(255, 255, 255, 0.1)',
+        bgTertiary: 'rgba(255, 255, 255, 0.05)',
+        textPrimary: '#fff',
+        textSecondary: '#b8d4e8',
+        primary: '#4a9eff',
+        primaryAlpha: 'rgba(74, 158, 255, 0.2)',
+        secondary: '#ffa94d',
+        secondaryAlpha: 'rgba(255, 169, 77, 0.2)',
+        danger: '#ff6b6b',
+        dangerAlpha: 'rgba(255, 107, 107, 0.2)',
+        borderPrimary: 'rgba(255, 255, 255, 0.15)',
+        borderSecondary: 'rgba(255, 255, 255, 0.25)',
+        gradient1: 'rgba(74, 158, 255, 0.15)',
+        gradient2: 'rgba(255, 169, 77, 0.15)',
+        gradient3: 'rgba(138, 201, 255, 0.1)'
+      },
+      light: {
+        name: 'Clair',
+        bgPrimary: 'linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%)',
+        bgSecondary: 'rgba(0, 0, 0, 0.04)',
+        bgTertiary: 'rgba(0, 0, 0, 0.02)',
+        textPrimary: '#1a1a1a',
+        textSecondary: '#666',
+        primary: '#007aff',
+        primaryAlpha: 'rgba(0, 122, 255, 0.1)',
+        secondary: '#ff9500',
+        secondaryAlpha: 'rgba(255, 149, 0, 0.1)',
+        danger: '#ff3b30',
+        dangerAlpha: 'rgba(255, 59, 48, 0.1)',
+        borderPrimary: 'rgba(0, 0, 0, 0.1)',
+        borderSecondary: 'rgba(0, 0, 0, 0.15)',
+        gradient1: 'rgba(0, 122, 255, 0.08)',
+        gradient2: 'rgba(255, 149, 0, 0.08)',
+        gradient3: 'rgba(88, 86, 214, 0.06)'
+      },
+      dark: {
+        name: 'Sombre',
+        bgPrimary: 'linear-gradient(135deg, #000000 0%, #0d0d0d 100%)',
+        bgSecondary: 'rgba(255, 255, 255, 0.06)',
+        bgTertiary: 'rgba(255, 255, 255, 0.03)',
+        textPrimary: '#fff',
+        textSecondary: '#999',
+        primary: '#ffffff',
+        primaryAlpha: 'rgba(255, 255, 255, 0.15)',
+        secondary: '#999',
+        secondaryAlpha: 'rgba(153, 153, 153, 0.15)',
+        danger: '#ff453a',
+        dangerAlpha: 'rgba(255, 69, 58, 0.15)',
+        borderPrimary: 'rgba(255, 255, 255, 0.08)',
+        borderSecondary: 'rgba(255, 255, 255, 0.12)',
+        gradient1: 'rgba(255, 255, 255, 0.05)',
+        gradient2: 'rgba(153, 153, 153, 0.05)',
+        gradient3: 'rgba(255, 255, 255, 0.03)'
+      }
+    };
+
+    // ============================================
+    // UTILITAIRES
+    // ============================================
+
+    const playSound = (type, settings) => {
+      if (!settings?.sounds?.enabled) return;
+      
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const volume = (settings?.sounds?.volume || 50) / 100;
+        
+        if (type === 'restEnd') {
+          [0, 0.15, 0.3].forEach((delay) => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.frequency.value = 800;
+            osc.type = 'sine';
+            gain.gain.value = volume;
+            osc.start(audioContext.currentTime + delay);
+            osc.stop(audioContext.currentTime + delay + 0.1);
+          });
+        } else if (type === 'validation') {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.frequency.value = 600;
+          osc.type = 'sine';
+          gain.gain.value = volume;
+          osc.start();
+          osc.stop(audioContext.currentTime + 0.05);
+        }
+      } catch (e) {
+        console.error('Sound error:', e);
+      }
+    };
+
+    const formatTime = (seconds) => {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const formatDuration = (ms) => {
+      const totalSeconds = Math.floor(ms / 1000);
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
+      return `${mins}min ${secs}s`;
+    };
+
+    // Calcul 1RM (formule Brzycki)
+    const calculate1RM = (weight, reps) => {
+      if (reps === 1) return weight;
+      return Math.round(weight * (36 / (37 - reps)) * 10) / 10;
+    };
+
+    // ============================================
+    // COMPOSANT ICÔNE
+    // ============================================
+
+    const Icon = ({ name, size = 24, strokeWidth = 2, color = 'currentColor', style = {} }) => {
+      const icons = {
+        dumbbell: 'M17.48 6.55 14 2.22l-.5-.5a1.5 1.5 0 0 0-2.12 0l-.5.5L7.52 6.55a1 1 0 0 0 0 1.42l.5.5 3 3L8.5 14l-3 3-.5.5a1 1 0 0 0 0 1.42l3.36 3.36.5.5a1.5 1.5 0 0 0 2.12 0l.5-.5L15 19.5l3-3 2.5-2.5a1 1 0 0 0 0-1.42l-.5-.5-3-3 2.5-2.5.5-.5a1 1 0 0 0-.02-1.43ZM12 16a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0-6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z',
+        plus: 'M5 12h14m-7-7v14',
+        x: 'M18 6 6 18M6 6l12 12',
+        check: 'M20 6 9 17l-5-5',
+        trendingUp: 'm3 17 6-6 4 4 8-8m0 0v7m0-7h-7',
+        clock: 'M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20ZM12 6v6l4 2',
+        calendar: 'M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z',
+        edit: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z',
+        trash: 'M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2',
+        settings: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z',
+        volume: 'M11 5 6 9H2v6h4l5 4V5Z M15.54 8.46a5 5 0 0 1 0 7.07',
+        volumeX: 'M11 5 6 9H2v6h4l5 4V5Z M23 9l-6 6M17 9l6 6',
+        messageSquare: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z',
+        barChart: 'M12 20V10m6 10V4M6 20v-4',
+        lightbulb: 'M9 18h6M10 22h4M15 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
+        zap: 'M13 2 3 14h8l-1 8 10-12h-8l1-8Z',
+        list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+      };
+      
+      const pathData = icons[name.toLowerCase()] || '';
+      const isStroke = !['dumbbell'].includes(name.toLowerCase());
+      
+      return (
+        <svg 
+          width={size} 
+          height={size} 
+          viewBox="0 0 24 24" 
+          fill={isStroke ? 'none' : color}
+          stroke={isStroke ? color : 'none'}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={style}
+        >
+          <path d={pathData} />
+        </svg>
+      );
+    };
+
+    // ============================================
+    // COMPOSANT PRINCIPAL
+    // ============================================
+
+    function FitnessTracker() {
+      const [workouts, setWorkouts] = useState([]);
+      const [currentWorkout, setCurrentWorkout] = useState(null);
+      const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+      const [currentSet, setCurrentSet] = useState(0);
+      const [isResting, setIsResting] = useState(false);
+      const [restTimeLeft, setRestTimeLeft] = useState(0);
+      const [history, setHistory] = useState([]);
+      const [view, setView] = useState('home');
+      const [showAddWorkout, setShowAddWorkout] = useState(false);
+      const [editingWorkout, setEditingWorkout] = useState(null);
+      const [exerciseLibrary, setExerciseLibrary] = useState([]);
+      const [settings, setSettings] = useState({ sounds: { enabled: true, volume: 50 }, theme: 'neon' });
+      const [showSettings, setShowSettings] = useState(false);
+      const [workoutToDelete, setWorkoutToDelete] = useState(null);
+      const [showConfirmation, setShowConfirmation] = useState(false);
+      const [selectedExerciseHistory, setSelectedExerciseHistory] = useState(null);
+      const [showSuggestions, setShowSuggestions] = useState(false);
+      const [currentDropsetWeight, setCurrentDropsetWeight] = useState(0);
+      
+      const timerRef = useRef(null);
+      const fileInputRef = useRef(null);
+
+      const exportWorkout = (workout) => {
+        const dataStr = JSON.stringify(workout, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${workout.name.replace(/\s+/g, '_')}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      };
+
+      const importWorkout = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const imported = JSON.parse(e.target.result);
+            const newWorkout = {
+              ...imported,
+              id: Date.now().toString(),
+              exercises: imported.exercises.map((ex, i) => ({
+                ...ex,
+                id: Date.now().toString() + '_' + i
+              }))
+            };
+            setWorkouts([...workouts, newWorkout]);
+          } catch (error) {
+            alert('Erreur import: fichier invalide');
+          }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+      };
+
+
+      useEffect(() => {
+        try {
+          const savedWorkouts = localStorage.getItem('fitnessWorkouts');
+          const savedHistory = localStorage.getItem('fitnessHistory');
+          const savedLibrary = localStorage.getItem('fitnessExerciseLibrary');
+          const savedSettings = localStorage.getItem('fitnessSettings');
+          
+          if (savedWorkouts) setWorkouts(JSON.parse(savedWorkouts));
+          if (savedHistory) setHistory(JSON.parse(savedHistory));
+          if (savedLibrary) setExerciseLibrary(JSON.parse(savedLibrary));
+          if (savedSettings) setSettings(JSON.parse(savedSettings));
+        } catch (e) {
+          console.error('Erreur chargement:', e);
+        }
+      }, []);
+
+      useEffect(() => {
+        if (workouts.length > 0) localStorage.setItem('fitnessWorkouts', JSON.stringify(workouts));
+      }, [workouts]);
+
+      useEffect(() => {
+        if (history.length > 0) localStorage.setItem('fitnessHistory', JSON.stringify(history));
+      }, [history]);
+
+      useEffect(() => {
+        if (exerciseLibrary.length > 0) localStorage.setItem('fitnessExerciseLibrary', JSON.stringify(exerciseLibrary));
+      }, [exerciseLibrary]);
+
+      useEffect(() => {
+        localStorage.setItem('fitnessSettings', JSON.stringify(settings));
+      }, [settings]);
+
+      useEffect(() => {
+        if (isResting && restTimeLeft > 0) {
+          timerRef.current = setInterval(() => {
+            setRestTimeLeft(prev => {
+              if (prev <= 1) {
+                setIsResting(false);
+                playSound('restEnd', settings);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
+          return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+          };
+        }
+      }, [isResting, restTimeLeft, settings]);
+
+      const saveWorkout = (workout) => {
+        const newExercises = workout.exercises.map(ex => ex.name);
+        const uniqueExercises = [...new Set([...exerciseLibrary, ...newExercises])];
+        setExerciseLibrary(uniqueExercises);
+
+        if (editingWorkout) {
+          setWorkouts(workouts.map(w => w.id === editingWorkout.id ? { ...workout, id: editingWorkout.id } : w));
+          setEditingWorkout(null);
+        } else {
+          const newWorkout = {
+            ...workout,
+            id: Date.now().toString(),
+            exercises: workout.exercises.map((ex, i) => ({
+              ...ex,
+              id: Date.now().toString() + '_' + i
+            }))
+          };
+          setWorkouts([...workouts, newWorkout]);
+        }
+        setShowAddWorkout(false);
+      };
+
+      const deleteWorkout = (workoutId) => {
+        const newWorkouts = workouts.filter(w => w.id !== workoutId);
+        setWorkouts(newWorkouts);
+        localStorage.setItem('fitnessWorkouts', JSON.stringify(newWorkouts));
+        setWorkoutToDelete(null);
+      };
+
+      const editWorkout = (workout) => {
+        setEditingWorkout(workout);
+        setShowAddWorkout(true);
+      };
+
+      const startWorkout = (workout) => {
+        setCurrentWorkout({
+          ...workout,
+          startTime: Date.now(),
+          logs: workout.exercises.map(ex => ({
+            exerciseId: ex.id,
+            sets: Array(ex.sets).fill(null)
+          }))
+        });
+        setCurrentExerciseIndex(0);
+        setCurrentSet(0);
+        
+        const firstExercise = workout.exercises[0];
+        if (firstExercise.type === 'dropset' && firstExercise.dropsetWeights) {
+          setCurrentDropsetWeight(0);
+        }
+        
+        setView('workout');
+      };
+
+      const completeSet = (weight, reps, note = '') => {
+        playSound('validation', settings);
+        
+        const exercise = currentWorkout.exercises[currentExerciseIndex];
+        const newLogs = [...currentWorkout.logs];
+        newLogs[currentExerciseIndex].sets[currentSet] = {
+          weight: parseFloat(weight) || 0,
+          reps: parseInt(reps) || 0,
+          timestamp: Date.now(),
+          note: note.trim()
+        };
+
+        setCurrentWorkout({ ...currentWorkout, logs: newLogs });
+
+        // Logique repos selon type
+        const nextExercise = currentWorkout.exercises[currentExerciseIndex + 1];
+        const shouldRest = exercise.type !== 'superset' || !nextExercise || nextExercise.type !== 'superset';
+        
+        if (shouldRest && exercise.restTime > 0) {
+          setRestTimeLeft(exercise.restTime);
+          setIsResting(true);
+        }
+
+        // Navigation
+        if (currentSet < exercise.sets - 1) {
+          setCurrentSet(currentSet + 1);
+          if (exercise.type === 'dropset' && currentDropsetWeight < (exercise.dropsetWeights?.length || 0) - 1) {
+            setCurrentDropsetWeight(currentDropsetWeight + 1);
+          }
+        } else if (currentExerciseIndex < currentWorkout.exercises.length - 1) {
+          setCurrentExerciseIndex(currentExerciseIndex + 1);
+          setCurrentSet(0);
+          setCurrentDropsetWeight(0);
+        } else {
+          finishWorkout();
+        }
+      };
+
+      const finishWorkout = () => {
+        const completedWorkout = {
+          ...currentWorkout,
+          endTime: Date.now(),
+          date: new Date().toISOString()
+        };
+        setHistory([completedWorkout, ...history]);
+        setCurrentWorkout(null);
+        setCurrentExerciseIndex(0);
+        setCurrentSet(0);
+        setCurrentDropsetWeight(0);
+        setView('history');
+      };
+
+      const skipRest = () => {
+        setIsResting(false);
+        setRestTimeLeft(0);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+      };
+
+      // Analyse suggestions progression
+      const getSuggestions = () => {
+        if (workouts.length === 0 || history.length < 3) return [];
+        
+        const suggestions = [];
+        
+        workouts.forEach(workout => {
+          workout.exercises.forEach(exercise => {
+            const recentPerformances = history
+              .filter(session => session.name === workout.name)
+              .slice(0, 3)
+              .map(session => {
+                const exIdx = session.exercises.findIndex(ex => ex.name.toLowerCase() === exercise.name.toLowerCase());
+                if (exIdx === -1) return null;
+                return session.logs[exIdx];
+              })
+              .filter(log => log && log.sets.every(s => s !== null));
+
+            if (recentPerformances.length === 3) {
+              const allSuccessful = recentPerformances.every(perf => 
+                perf.sets.every(set => set.reps >= exercise.reps && set.weight >= exercise.weight)
+              );
+
+              if (allSuccessful) {
+                const avgReps = recentPerformances[0].sets.reduce((acc, s) => acc + s.reps, 0) / recentPerformances[0].sets.length;
+                
+                suggestions.push({
+                  workoutId: workout.id,
+                  workoutName: workout.name,
+                  exerciseName: exercise.name,
+                  currentWeight: exercise.weight,
+                  currentReps: exercise.reps,
+                  suggestion: avgReps >= 15 
+                    ? { type: 'weight', value: exercise.weight + 2.5 }
+                    : { type: 'reps', value: exercise.reps + 1 }
+                });
+              }
+            }
+          });
+        });
+
+        return suggestions;
+      };
+
+      const applySuggestion = (suggestion) => {
+        setWorkouts(workouts.map(w => {
+          if (w.id !== suggestion.workoutId) return w;
+          
+          return {
+            ...w,
+            exercises: w.exercises.map(ex => {
+              if (ex.name.toLowerCase() !== suggestion.exerciseName.toLowerCase()) return ex;
+              
+              if (suggestion.suggestion.type === 'weight') {
+                return { ...ex, weight: suggestion.suggestion.value };
+              } else {
+                return { ...ex, reps: suggestion.suggestion.value };
+              }
+            })
+          };
+        }));
+        setShowSuggestions(false);
+      };
+
+      const theme = THEMES[settings.theme] || THEMES.neon;
+
+      return (
+        <div style={{
+          minHeight: '100vh',
+          background: theme.bgPrimary,
+          color: theme.textPrimary,
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `
+              radial-gradient(circle at 20% 80%, ${theme.gradient1} 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, ${theme.gradient2} 0%, transparent 50%),
+              radial-gradient(circle at 50% 50%, ${theme.gradient3} 0%, transparent 50%)
+            `,
+            pointerEvents: 'none',
+            zIndex: 0
+          }} />
+
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            {view === 'home' && <HomeView 
+              workouts={workouts}
+              onStartWorkout={startWorkout}
+              onAddWorkout={() => {
+                setEditingWorkout(null);
+                setShowAddWorkout(true);
+              }}
+              onEditWorkout={editWorkout}
+              onDeleteWorkout={(w) => setWorkoutToDelete(w)}
+              onViewHistory={() => setView('history')}
+              onOpenSettings={() => setShowSettings(true)}
+              onShowSuggestions={() => setShowSuggestions(true)}
+              suggestions={getSuggestions()}
+              theme={theme}
+              settings={settings}
+              onExportWorkout={exportWorkout}
+              onImportWorkout={importWorkout}
+              fileInputRef={fileInputRef}
+            />}
+            
+            {view === 'workout' && currentWorkout && (
+              <WorkoutView
+                workout={currentWorkout}
+                exerciseIndex={currentExerciseIndex}
+                currentSet={currentSet}
+                isResting={isResting}
+                restTimeLeft={restTimeLeft}
+                onCompleteSet={completeSet}
+                onSkipRest={skipRest}
+                onQuit={() => {
+                  if (timerRef.current) {
+                    clearInterval(timerRef.current);
+                    timerRef.current = null;
+                  }
+                  setIsResting(false);
+                  setRestTimeLeft(0);
+                  setView('home');
+                  setCurrentWorkout(null);
+                }}
+                formatTime={formatTime}
+                showConfirmation={showConfirmation}
+                setShowConfirmation={setShowConfirmation}
+                history={history}
+                theme={theme}
+                currentDropsetWeight={currentDropsetWeight}
+              />
+            )}
+            
+            {view === 'history' && (
+              <HistoryView
+                history={history}
+                onBack={() => setView('home')}
+                formatDuration={formatDuration}
+                onViewExercise={(exerciseName) => {
+                  setSelectedExerciseHistory(exerciseName);
+                  setView('exerciseHistory');
+                }}
+                theme={theme}
+              />
+            )}
+
+            {view === 'exerciseHistory' && (
+              <ExerciseHistoryView
+                exerciseName={selectedExerciseHistory}
+                history={history}
+                onBack={() => {
+                  setSelectedExerciseHistory(null);
+                  setView('history');
+                }}
+                theme={theme}
+              />
+            )}
+            
+            {showAddWorkout && (
+              <AddWorkoutModal
+                workout={editingWorkout}
+                exerciseLibrary={exerciseLibrary}
+                onSave={saveWorkout}
+                onClose={() => {
+                  setShowAddWorkout(false);
+                  setEditingWorkout(null);
+                }}
+                theme={theme}
+              />
+            )}
+
+            {showSettings && (
+              <SettingsModal
+                settings={settings}
+                onSave={setSettings}
+                onClose={() => setShowSettings(false)}
+                theme={theme}
+              />
+            )}
+
+            {workoutToDelete && (
+              <ConfirmDeleteModal
+                workout={workoutToDelete}
+                onConfirm={() => deleteWorkout(workoutToDelete.id)}
+                onCancel={() => setWorkoutToDelete(null)}
+                theme={theme}
+              />
+            )}
+
+            {showSuggestions && (
+              <SuggestionsModal
+                suggestions={getSuggestions()}
+                onApply={applySuggestion}
+                onClose={() => setShowSuggestions(false)}
+                theme={theme}
+              />
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================
+    // HOME VIEW
+    // ============================================
+
+    function HomeView({ workouts, onStartWorkout, onAddWorkout, onEditWorkout, onDeleteWorkout, onViewHistory, onOpenSettings, onShowSuggestions, suggestions, theme, settings, onExportWorkout, onImportWorkout, fileInputRef }) {
+      return (
+        <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ marginBottom: '48px', animation: 'slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  background: `linear-gradient(135deg, ${theme.danger} 0%, #FF6B35 100%)`,
+                  borderRadius: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: `0 8px 24px ${theme.dangerAlpha}`,
+                  transform: 'rotate(-5deg)'
+                }}>
+                  <Icon name="dumbbell" size={32} strokeWidth={2.5} color="#fff" />
+                </div>
+                <h1 style={{
+                  fontSize: '48px',
+                  fontWeight: '900',
+                  margin: 0,
+                  letterSpacing: '-2px',
+                  textTransform: 'uppercase'
+                }}>
+                  FitTrack
+                </h1>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {suggestions.length > 0 && (
+                  <button
+                    onClick={onShowSuggestions}
+                    style={{
+                      background: theme.secondaryAlpha,
+                      border: `2px solid ${theme.secondary}`,
+                      borderRadius: '12px',
+                      padding: '12px',
+                      color: theme.secondary,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s',
+                      position: 'relative'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = theme.secondary}
+                    onMouseLeave={(e) => e.target.style.background = theme.secondaryAlpha}
+                  >
+                    <Icon name="lightbulb" size={24} strokeWidth={2} />
+                    <span style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      background: theme.danger,
+                      color: '#fff',
+                      borderRadius: '50%',
+                      width: '24px',
+                      height: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: '900'
+                    }}>
+                      {suggestions.length}
+                    </span>
+                  </button>
+                )}
+                <button
+                  onClick={onOpenSettings}
+                  style={{
+                    background: theme.bgSecondary,
+                    border: `2px solid ${theme.borderSecondary}`,
+                    borderRadius: '12px',
+                    padding: '12px',
+                    color: theme.textPrimary,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = theme.bgTertiary;
+                    e.target.style.transform = 'rotate(90deg)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = theme.bgSecondary;
+                    e.target.style.transform = 'rotate(0deg)';
+                  }}
+                >
+                  <Icon name="settings" size={24} strokeWidth={2} />
+                </button>
+              </div>
+            </div>
+            <p style={{ fontSize: '18px', color: theme.textSecondary, margin: 0, fontWeight: '500' }}>
+              v2.0 Phase 2 - Thèmes, Historique, Suggestions & Modes
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gap: '16px', marginBottom: '48px' }}>
+            <button
+              onClick={onAddWorkout}
+              style={{
+                background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+                border: 'none',
+                borderRadius: '16px',
+                padding: '24px',
+                color: settings.theme === 'classic' ? '#fff' : '#000',
+                fontSize: '20px',
+                fontWeight: '900',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                boxShadow: `0 8px 24px ${theme.primaryAlpha}`,
+                transition: 'transform 0.2s',
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+              }}
+              onMouseEnter={(e) => e.target.style.transform = 'translateY(-4px)'}
+              onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+            >
+              <Icon name="plus" size={24} strokeWidth={3} />
+              Nouveau Programme
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={onImportWorkout}
+              style={{ display: 'none' }}
+            />
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                background: theme.secondaryAlpha,
+                border: `2px solid ${theme.secondary}`,
+                borderRadius: '16px',
+                padding: '20px',
+                color: theme.secondary,
+                fontSize: '18px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                transition: 'all 0.2s',
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = theme.secondary;
+                e.target.style.color = '#000';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = theme.secondaryAlpha;
+                e.target.style.color = theme.secondary;
+              }}
+            >
+              <Icon name="plus" size={20} strokeWidth={2.5} />
+              Importer Programme
+            </button>
+
+            <button
+              onClick={onViewHistory}
+              style={{
+                background: theme.bgSecondary,
+                border: `2px solid ${theme.borderSecondary}`,
+                borderRadius: '16px',
+                padding: '20px',
+                color: theme.textPrimary,
+                fontSize: '18px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                transition: 'all 0.2s',
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = theme.bgTertiary;
+                e.target.style.borderColor = theme.borderPrimary;
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = theme.bgSecondary;
+                e.target.style.borderColor = theme.borderSecondary;
+              }}
+            >
+              <Icon name="trendingUp" size={20} strokeWidth={2.5} />
+              Historique
+            </button>
+          </div>
+
+          <div>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '900',
+              marginBottom: '24px',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}>
+              Mes Programmes
+            </h2>
+            
+            {workouts.length === 0 ? (
+              <div style={{
+                background: theme.bgTertiary,
+                borderRadius: '16px',
+                padding: '48px',
+                textAlign: 'center',
+                border: `2px dashed ${theme.borderPrimary}`
+              }}>
+                <p style={{ fontSize: '18px', color: theme.textSecondary, margin: 0 }}>
+                  Aucun programme. Crée ton premier workout !
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gap: '16px' }}>
+                {workouts.map((workout, index) => (
+                  <div
+                    key={workout.id}
+                    style={{
+                      background: theme.bgSecondary,
+                      borderRadius: '16px',
+                      padding: '24px',
+                      border: `2px solid ${theme.borderPrimary}`,
+                      transition: 'all 0.3s',
+                      animation: `slideUp 0.5s ${index * 0.1}s cubic-bezier(0.34, 1.56, 0.64, 1) backwards`
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
+                      <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => onStartWorkout(workout)}>
+                        <h3 style={{
+                          fontSize: '24px',
+                          fontWeight: '900',
+                          margin: '0 0 12px 0',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>
+                          {workout.name}
+                        </h3>
+                        <p style={{ fontSize: '16px', color: theme.textSecondary, margin: '0 0 16px 0' }}>
+                          {workout.exercises.length} exercice{workout.exercises.length > 1 ? 's' : ''}
+                        </p>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onExportWorkout(workout);
+                          }}
+                          style={{
+                            background: theme.secondaryAlpha,
+                            border: `2px solid ${theme.secondary}`,
+                            borderRadius: '8px',
+                            padding: '8px',
+                            color: theme.secondary,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = theme.secondary;
+                            e.target.style.color = '#000';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = theme.secondaryAlpha;
+                            e.target.style.color = theme.secondary;
+                          }}
+                          title="Exporter"
+                        >
+                          <span style={{ fontSize: '16px' }}>📥</span>
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditWorkout(workout);
+                          }}
+                          style={{
+                            background: theme.primaryAlpha,
+                            border: `2px solid ${theme.primary}`,
+                            borderRadius: '8px',
+                            padding: '8px',
+                            color: theme.primary,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = theme.primary;
+                            e.target.style.color = '#000';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = theme.primaryAlpha;
+                            e.target.style.color = theme.primary;
+                          }}
+                        >
+                          <Icon name="edit" size={16} strokeWidth={2.5} />
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteWorkout(workout);
+                          }}
+                          style={{
+                            background: theme.dangerAlpha,
+                            border: `2px solid ${theme.danger}`,
+                            borderRadius: '8px',
+                            padding: '8px',
+                            color: theme.danger,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = theme.danger;
+                            e.target.style.color = '#fff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = theme.dangerAlpha;
+                            e.target.style.color = theme.danger;
+                          }}
+                        >
+                          <Icon name="trash" size={16} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {workout.exercises.map((ex, i) => {
+                        const typeLabels = {
+                          superset: '🔗 Superset',
+                          dropset: '📉 Dropset'
+                        };
+                        const label = ex.type ? `${typeLabels[ex.type] || ''} ${ex.name}` : ex.name;
+                        
+                        return (
+                          <span
+                            key={i}
+                            style={{
+                              background: ex.type ? theme.dangerAlpha : theme.secondaryAlpha,
+                              color: ex.type ? theme.danger : theme.secondary,
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              fontSize: '14px',
+                              fontWeight: '700'
+                            }}
+                          >
+                            {label}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================
+    // WORKOUT VIEW
+    // ============================================
+
+    function WorkoutView({ workout, exerciseIndex, currentSet, isResting, restTimeLeft, onCompleteSet, onSkipRest, onQuit, formatTime, showConfirmation, setShowConfirmation, history, theme, currentDropsetWeight }) {
+      const [weight, setWeight] = useState('');
+      const [reps, setReps] = useState('');
+      const [note, setNote] = useState('');
+      const exercise = workout.exercises[exerciseIndex];
+      const progress = ((exerciseIndex * exercise.sets + currentSet) / (workout.exercises.reduce((acc, ex) => acc + ex.sets, 0))) * 100;
+
+      const getLastPerformance = () => {
+        if (!history || history.length === 0) return null;
+        
+        for (const session of history) {
+          const exerciseInSession = session.exercises.find(ex => ex.name.toLowerCase() === exercise.name.toLowerCase());
+          if (exerciseInSession) {
+            const exIndex = session.exercises.findIndex(ex => ex.name.toLowerCase() === exercise.name.toLowerCase());
+            if (exIndex !== -1 && session.logs[exIndex]) {
+              const logs = session.logs[exIndex];
+              const completedSets = logs.sets.filter(s => s !== null);
+              if (completedSets.length > 0) {
+                return {
+                  date: new Date(session.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+                  sets: completedSets
+                };
+              }
+            }
+          }
+        }
+        return null;
+      };
+
+      const lastPerformance = getLastPerformance();
+      
+      const getCurrentWeight = () => {
+        if (exercise.type === 'dropset' && exercise.dropsetWeights) {
+          return exercise.dropsetWeights[currentDropsetWeight] || exercise.weight;
+        }
+        return exercise.weight;
+      };
+
+      const showQuickValidateConfirm = () => {
+        setShowConfirmation(true);
+      };
+
+      const confirmQuickValidate = () => {
+        setShowConfirmation(false);
+        const currentW = getCurrentWeight();
+        onCompleteSet(currentW, exercise.reps);
+        setWeight('');
+        setReps('');
+      };
+
+      const cancelQuickValidate = () => {
+        setShowConfirmation(false);
+      };
+
+      const exerciseTypeLabel = {
+        superset: '🔗 Superset',
+        dropset: '📉 Dropset'
+      };
+
+      return (
+        <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            marginBottom: '24px',
+            animation: 'slideDown 0.4s ease-out'
+          }}>
+            <button
+              onClick={onQuit}
+              style={{
+                background: theme.bgSecondary,
+                border: `2px solid ${theme.borderSecondary}`,
+                borderRadius: '12px',
+                padding: '12px',
+                color: theme.textPrimary,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+              onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+            >
+              <Icon name="x" size={20} strokeWidth={3} />
+            </button>
+            <h2 style={{
+              fontSize: '28px',
+              fontWeight: '900',
+              margin: 0,
+              textTransform: 'uppercase',
+              letterSpacing: '-0.5px'
+            }}>
+              {workout.name}
+            </h2>
+          </div>
+
+          <div style={{
+            background: theme.bgTertiary,
+            borderRadius: '12px',
+            height: '8px',
+            marginBottom: '32px',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              background: `linear-gradient(90deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+              height: '100%',
+              width: `${progress}%`,
+              transition: 'width 0.3s ease-out',
+              boxShadow: `0 0 16px ${theme.primaryAlpha}`
+            }} />
+          </div>
+
+          <div style={{
+            background: theme.bgSecondary,
+            borderRadius: '16px',
+            padding: '32px',
+            border: `2px solid ${theme.borderPrimary}`
+          }}>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{
+                display: 'inline-block',
+                background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+                color: '#000',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '900',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+              }}>
+                Exercice {exerciseIndex + 1}/{workout.exercises.length}
+              </div>
+              {exercise.type && (
+                <div style={{
+                  display: 'inline-block',
+                  background: theme.dangerAlpha,
+                  color: theme.danger,
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '900',
+                  marginLeft: '8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}>
+                  {exerciseTypeLabel[exercise.type]}
+                </div>
+              )}
+            </div>
+
+            <h3 style={{
+              fontSize: '32px',
+              fontWeight: '900',
+              margin: '0 0 24px 0',
+              textTransform: 'uppercase',
+              letterSpacing: '-1px'
+            }}>
+              {exercise.name}
+            </h3>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '16px',
+              marginBottom: '24px'
+            }}>
+              <div style={{
+                background: theme.primaryAlpha,
+                borderRadius: '12px',
+                padding: '16px',
+                border: `2px solid ${theme.primary}`
+              }}>
+                <p style={{
+                  fontSize: '14px',
+                  color: theme.primary,
+                  margin: '0 0 8px 0',
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}>
+                  Série
+                </p>
+                <p style={{
+                  fontSize: '24px',
+                  fontWeight: '900',
+                  margin: 0,
+                  color: theme.primary
+                }}>
+                  {currentSet + 1}/{exercise.sets}
+                </p>
+              </div>
+
+              <div style={{
+                background: isResting ? theme.dangerAlpha : theme.bgTertiary,
+                borderRadius: '12px',
+                padding: '16px',
+                border: `2px solid ${isResting ? theme.danger : theme.borderPrimary}`,
+                animation: isResting ? 'pulse 1s infinite' : 'none'
+              }}>
+                <p style={{
+                  fontSize: '14px',
+                  color: isResting ? theme.danger : theme.textSecondary,
+                  margin: '0 0 8px 0',
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}>
+                  {isResting ? 'Repos' : 'Temps de repos'}
+                </p>
+                <p style={{
+                  fontSize: '24px',
+                  fontWeight: '900',
+                  margin: 0,
+                  color: isResting ? theme.danger : theme.textPrimary
+                }}>
+                  {isResting ? formatTime(restTimeLeft) : formatTime(exercise.restTime)}
+                </p>
+              </div>
+            </div>
+
+            {isResting ? (
+              <button
+                onClick={onSkipRest}
+                style={{
+                  width: '100%',
+                  background: theme.dangerAlpha,
+                  border: `2px solid ${theme.danger}`,
+                  borderRadius: '12px',
+                  padding: '20px',
+                  color: theme.danger,
+                  fontSize: '18px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = theme.danger;
+                  e.target.style.color = '#fff';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = theme.dangerAlpha;
+                  e.target.style.color = theme.danger;
+                }}
+              >
+                Skip Repos
+              </button>
+            ) : (
+              <div>
+                {lastPerformance && (
+                  <div style={{
+                    background: theme.bgTertiary,
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '16px',
+                    border: `2px solid ${theme.borderPrimary}`
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '12px'
+                    }}>
+                      <Icon name="clock" size={16} color={theme.textSecondary} />
+                      <p style={{
+                        fontSize: '12px',
+                        color: theme.textSecondary,
+                        margin: 0,
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px'
+                      }}>
+                        Dernière fois ({lastPerformance.date})
+                      </p>
+                    </div>
+                    <div style={{ display: 'grid', gap: '6px' }}>
+                      {lastPerformance.sets.map((set, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            fontSize: '14px',
+                            color: theme.textSecondary,
+                            fontWeight: '600'
+                          }}
+                        >
+                          <span>
+                            Série {idx + 1}: <span style={{ color: theme.textPrimary, fontWeight: '900' }}>{set.reps} reps × {set.weight}kg</span>
+                          </span>
+                          {set.note && (
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '4px 8px',
+                              background: theme.secondaryAlpha,
+                              borderRadius: '4px',
+                              border: `1px solid ${theme.secondary}`
+                            }}>
+                              <Icon name="messageSquare" size={12} color={theme.secondary} />
+                              <span style={{
+                                fontSize: '12px',
+                                color: theme.secondary,
+                                fontStyle: 'italic',
+                                maxWidth: '150px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {set.note}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{
+                  background: theme.secondaryAlpha,
+                  borderRadius: '12px',
+                  padding: '16px',
+                  marginBottom: '16px',
+                  border: `2px solid ${theme.secondary}`
+                }}>
+                  <p style={{
+                    fontSize: '14px',
+                    color: theme.secondary,
+                    margin: '0 0 8px 0',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    Objectif
+                  </p>
+                  <p style={{
+                    fontSize: '20px',
+                    fontWeight: '900',
+                    margin: 0,
+                    color: theme.secondary
+                  }}>
+                    {exercise.reps} reps × {getCurrentWeight()}kg
+                  </p>
+                  {exercise.type === 'dropset' && (
+                    <p style={{
+                      fontSize: '12px',
+                      color: theme.secondary,
+                      margin: '8px 0 0 0',
+                      fontStyle: 'italic'
+                    }}>
+                      Série {currentSet + 1}: {getCurrentWeight()}kg
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  onClick={showQuickValidateConfirm}
+                  style={{
+                    background: theme.secondaryAlpha,
+                    border: `2px solid ${theme.secondary}`,
+                    borderRadius: '12px',
+                    padding: '16px',
+                    color: theme.secondary,
+                    fontSize: '16px',
+                    fontWeight: '900',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    transition: 'all 0.2s',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    marginBottom: '24px',
+                    width: '100%'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = theme.secondary;
+                    e.target.style.color = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = theme.secondaryAlpha;
+                    e.target.style.color = theme.secondary;
+                  }}
+                >
+                  <Icon name="check" size={20} strokeWidth={3} />
+                  Objectif atteint !
+                </button>
+
+                {showConfirmation && (
+                  <>
+                    <div 
+                      onClick={cancelQuickValidate}
+                      style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0, 0, 0, 0.8)',
+                        backdropFilter: 'blur(4px)',
+                        zIndex: 9998,
+                        animation: 'fadeIn 0.2s'
+                      }}
+                    />
+                    
+                    <div style={{
+                      position: 'fixed',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      background: theme.bgPrimary,
+                      borderRadius: '24px',
+                      padding: '32px',
+                      zIndex: 9999,
+                      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                      border: `3px solid ${theme.secondary}`,
+                      animation: 'slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      minWidth: '320px',
+                      maxWidth: '90%'
+                    }}>
+                      <h3 style={{
+                        fontSize: '24px',
+                        fontWeight: '900',
+                        color: theme.secondary,
+                        margin: '0 0 16px 0',
+                        textAlign: 'center',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px'
+                      }}>
+                        T'es sûr ?
+                      </h3>
+                      
+                      <p style={{
+                        fontSize: '18px',
+                        color: theme.textPrimary,
+                        margin: '0 0 24px 0',
+                        textAlign: 'center',
+                        fontWeight: '700'
+                      }}>
+                        Tu as fait <span style={{ color: theme.secondary }}>{exercise.reps} reps × {getCurrentWeight()}kg</span> ?
+                      </p>
+
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '12px'
+                      }}>
+                        <button
+                          onClick={cancelQuickValidate}
+                          style={{
+                            background: theme.dangerAlpha,
+                            border: `2px solid ${theme.danger}`,
+                            borderRadius: '12px',
+                            padding: '16px',
+                            color: theme.danger,
+                            fontSize: '16px',
+                            fontWeight: '900',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = theme.danger;
+                            e.target.style.color = '#fff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = theme.dangerAlpha;
+                            e.target.style.color = theme.danger;
+                          }}
+                        >
+                          Non
+                        </button>
+
+                        <button
+                          onClick={confirmQuickValidate}
+                          style={{
+                            background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+                            border: 'none',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            color: '#000',
+                            fontSize: '16px',
+                            fontWeight: '900',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            boxShadow: `0 4px 12px ${theme.primaryAlpha}`
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = 'scale(1)';
+                          }}
+                        >
+                          Oui !
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div style={{ display: 'grid', gap: '16px' }}>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      marginBottom: '8px',
+                      color: theme.textSecondary,
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px'
+                    }}>
+                      Poids (kg)
+                    </label>
+                    <input
+                      type="number"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                      placeholder={getCurrentWeight().toString()}
+                      style={{
+                        width: '100%',
+                        background: theme.bgTertiary,
+                        border: `2px solid ${theme.borderSecondary}`,
+                        borderRadius: '12px',
+                        padding: '16px',
+                        color: theme.textPrimary,
+                        fontSize: '24px',
+                        fontWeight: '900',
+                        fontFamily: 'inherit',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      marginBottom: '8px',
+                      color: theme.textSecondary,
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px'
+                    }}>
+                      Répétitions
+                    </label>
+                    <input
+                      type="number"
+                      value={reps}
+                      onChange={(e) => setReps(e.target.value)}
+                      placeholder={exercise.reps.toString()}
+                      style={{
+                        width: '100%',
+                        background: theme.bgTertiary,
+                        border: `2px solid ${theme.borderSecondary}`,
+                        borderRadius: '12px',
+                        padding: '16px',
+                        color: theme.textPrimary,
+                        fontSize: '24px',
+                        fontWeight: '900',
+                        fontFamily: 'inherit',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      marginBottom: '8px',
+                      color: theme.textSecondary,
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px'
+                    }}>
+                      Note (optionnel)
+                    </label>
+                    <textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="ex: Douleur épaule, trop facile..."
+                      maxLength={200}
+                      style={{
+                        width: '100%',
+                        background: theme.bgTertiary,
+                        border: `2px solid ${theme.borderSecondary}`,
+                        borderRadius: '12px',
+                        padding: '16px',
+                        color: theme.textPrimary,
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        fontFamily: 'inherit',
+                        boxSizing: 'border-box',
+                        resize: 'none',
+                        height: '80px',
+                        marginBottom: '4px'
+                      }}
+                    />
+                    <p style={{
+                      fontSize: '12px',
+                      color: theme.textSecondary,
+                      margin: '0 0 16px 0',
+                      textAlign: 'right'
+                    }}>
+                      {note.length}/200
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (weight || reps) {
+                        const currentW = getCurrentWeight();
+                        onCompleteSet(weight || currentW, reps || exercise.reps, note);
+                        setWeight('');
+                        setReps('');
+                        setNote('');
+                      }
+                    }}
+                    disabled={!weight && !reps}
+                    style={{
+                      background: weight || reps ? `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)` : theme.bgTertiary,
+                      border: 'none',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      color: weight || reps ? '#000' : theme.textSecondary,
+                      fontSize: '18px',
+                      fontWeight: '900',
+                      cursor: weight || reps ? 'pointer' : 'not-allowed',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '12px',
+                      transition: 'all 0.2s',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      boxShadow: weight || reps ? `0 8px 24px ${theme.primaryAlpha}` : 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (weight || reps) {
+                        e.target.style.transform = 'scale(1.02)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                  >
+                    <Icon name="check" size={24} strokeWidth={3} />
+                    Valider la série
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================
+    // HISTORY VIEW
+    // ============================================
+
+    function HistoryView({ history, onBack, formatDuration, onViewExercise, theme }) {
+      const allExercises = [...new Set(history.flatMap(s => s.exercises.map(ex => ex.name)))];
+
+      return (
+        <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+            <button
+              onClick={onBack}
+              style={{
+                background: theme.bgSecondary,
+                border: `2px solid ${theme.borderSecondary}`,
+                borderRadius: '12px',
+                padding: '12px',
+                color: theme.textPrimary,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+              onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+            >
+              <Icon name="x" size={20} strokeWidth={3} />
+            </button>
+            <h2 style={{
+              fontSize: '32px',
+              fontWeight: '900',
+              margin: 0,
+              textTransform: 'uppercase',
+              letterSpacing: '-1px'
+            }}>
+              Historique
+            </h2>
+          </div>
+
+          {allExercises.length > 0 && (
+            <button
+              onClick={() => onViewExercise(null)}
+              style={{
+                background: theme.secondaryAlpha,
+                border: `2px solid ${theme.secondary}`,
+                borderRadius: '12px',
+                padding: '16px',
+                color: theme.secondary,
+                fontSize: '16px',
+                fontWeight: '900',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                transition: 'all 0.2s',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                width: '100%',
+                marginBottom: '32px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = theme.secondary;
+                e.target.style.color = '#000';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = theme.secondaryAlpha;
+                e.target.style.color = theme.secondary;
+              }}
+            >
+              <Icon name="barChart" size={20} strokeWidth={2.5} />
+              Par Exercice
+            </button>
+          )}
+
+          {history.length === 0 ? (
+            <div style={{
+              background: theme.bgTertiary,
+              borderRadius: '16px',
+              padding: '48px',
+              textAlign: 'center',
+              border: `2px dashed ${theme.borderPrimary}`
+            }}>
+              <p style={{ fontSize: '18px', color: theme.textSecondary, margin: 0 }}>
+                Aucune séance enregistrée
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: '16px' }}>
+              {history.map((session, index) => (
+                <div
+                  key={index}
+                  style={{
+                    background: theme.bgSecondary,
+                    borderRadius: '16px',
+                    padding: '24px',
+                    border: `2px solid ${theme.borderPrimary}`,
+                    animation: `slideUp 0.5s ${index * 0.05}s cubic-bezier(0.34, 1.56, 0.64, 1) backwards`
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
+                    <div>
+                      <h3 style={{
+                        fontSize: '24px',
+                        fontWeight: '900',
+                        margin: '0 0 8px 0',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        {session.name}
+                      </h3>
+                      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontSize: '14px',
+                          color: theme.textSecondary,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontWeight: '700'
+                        }}>
+                          <Icon name="calendar" size={16} />
+                          {new Date(session.date).toLocaleDateString('fr-FR', { 
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}
+                        </span>
+                        <span style={{
+                          fontSize: '14px',
+                          color: theme.textSecondary,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontWeight: '700'
+                        }}>
+                          <Icon name="clock" size={16} />
+                          {formatDuration(session.endTime - session.startTime)}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{
+                      background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+                      color: '#000',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '900',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px'
+                    }}>
+                      Complété
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gap: '12px' }}>
+                    {session.exercises.map((exercise, exIndex) => {
+                      const exerciseLogs = session.logs[exIndex];
+                      const completedSets = exerciseLogs.sets.filter(s => s !== null).length;
+                      
+                      return (
+                        <div
+                          key={exIndex}
+                          style={{
+                            background: theme.bgTertiary,
+                            borderRadius: '12px',
+                            padding: '16px',
+                            border: `1px solid ${theme.borderPrimary}`
+                          }}
+                        >
+                          <h4 style={{
+                            fontSize: '18px',
+                            fontWeight: '900',
+                            margin: '0 0 12px 0',
+                            textTransform: 'uppercase'
+                          }}>
+                            {exercise.name}
+                          </h4>
+                          <div style={{ display: 'grid', gap: '8px' }}>
+                            {exerciseLogs.sets.map((set, setIndex) => (
+                              set && (
+                                <div
+                                  key={setIndex}
+                                  style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    background: theme.bgSecondary,
+                                    padding: '12px',
+                                    borderRadius: '8px',
+                                    border: `1px solid ${theme.borderPrimary}`
+                                  }}
+                                >
+                                  <div>
+                                    <span style={{
+                                      fontSize: '16px',
+                                      fontWeight: '700',
+                                      color: theme.primary
+                                    }}>
+                                      Série {setIndex + 1}:
+                                    </span>
+                                    <span style={{
+                                      fontSize: '16px',
+                                      fontWeight: '900',
+                                      marginLeft: '12px',
+                                      color: theme.textPrimary
+                                    }}>
+                                      {set.reps} reps × {set.weight}kg
+                                    </span>
+                                    {set.note && (
+                                      <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        marginTop: '8px',
+                                        padding: '8px 12px',
+                                        background: theme.secondaryAlpha,
+                                        borderRadius: '6px',
+                                        border: `1px solid ${theme.secondary}`
+                                      }}>
+                                        <Icon name="messageSquare" size={14} color={theme.secondary} />
+                                        <span style={{
+                                          fontSize: '14px',
+                                          color: theme.secondary,
+                                          fontWeight: '600',
+                                          fontStyle: 'italic'
+                                        }}>
+                                          {set.note}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ============================================
+    // EXERCISE HISTORY VIEW
+    // ============================================
+
+    function ExerciseHistoryView({ exerciseName, history, onBack, theme }) {
+      const allExercises = [...new Set(history.flatMap(s => s.exercises.map(ex => ex.name)))].sort();
+      const [selectedExercise, setSelectedExercise] = useState(exerciseName || allExercises[0] || '');
+
+      const getExerciseHistory = (exName) => {
+        const performances = [];
+        
+        history.forEach(session => {
+          const exIdx = session.exercises.findIndex(ex => ex.name.toLowerCase() === exName.toLowerCase());
+          if (exIdx !== -1) {
+            const logs = session.logs[exIdx];
+            const sets = logs.sets.filter(s => s !== null);
+            if (sets.length > 0) {
+              performances.push({
+                date: new Date(session.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+                sets: sets,
+                sessionName: session.name
+              });
+            }
+          }
+        });
+        
+        return performances.reverse();
+      };
+
+      const performances = selectedExercise ? getExerciseHistory(selectedExercise) : [];
+      
+      const getBest1RM = () => {
+        let best = 0;
+        performances.forEach(perf => {
+          perf.sets.forEach(set => {
+            const rm = calculate1RM(set.weight, set.reps);
+            if (rm > best) best = rm;
+          });
+        });
+        return best;
+      };
+
+      const getMaxWeight = () => {
+        let max = 0;
+        performances.forEach(perf => {
+          perf.sets.forEach(set => {
+            if (set.weight > max) max = set.weight;
+          });
+        });
+        return max;
+      };
+
+      const best1RM = getBest1RM();
+      const maxWeight = getMaxWeight();
+
+      return (
+        <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+            <button
+              onClick={onBack}
+              style={{
+                background: theme.bgSecondary,
+                border: `2px solid ${theme.borderSecondary}`,
+                borderRadius: '12px',
+                padding: '12px',
+                color: theme.textPrimary,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+              onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+            >
+              <Icon name="x" size={20} strokeWidth={3} />
+            </button>
+            <h2 style={{
+              fontSize: '32px',
+              fontWeight: '900',
+              margin: 0,
+              textTransform: 'uppercase',
+              letterSpacing: '-1px'
+            }}>
+              Historique par Exercice
+            </h2>
+          </div>
+
+          <div style={{ marginBottom: '32px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '14px',
+              fontWeight: '700',
+              marginBottom: '12px',
+              color: theme.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}>
+              Exercice
+            </label>
+            <select
+              value={selectedExercise}
+              onChange={(e) => setSelectedExercise(e.target.value)}
+              style={{
+                width: '100%',
+                background: theme.bgSecondary,
+                border: `2px solid ${theme.borderSecondary}`,
+                borderRadius: '12px',
+                padding: '16px',
+                color: theme.textPrimary,
+                fontSize: '18px',
+                fontWeight: '700',
+                fontFamily: 'inherit',
+                cursor: 'pointer'
+              }}
+            >
+              {allExercises.map((ex, i) => (
+                <option key={i} value={ex} style={{color: '#000'}}>{ex}</option>
+              ))}
+            </select>
+          </div>
+
+          {performances.length > 0 && (
+            <>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '16px',
+                marginBottom: '32px'
+              }}>
+                <div style={{
+                  background: theme.primaryAlpha,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  border: `2px solid ${theme.primary}`
+                }}>
+                  <p style={{
+                    fontSize: '14px',
+                    color: theme.primary,
+                    margin: '0 0 8px 0',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    Meilleur 1RM
+                  </p>
+                  <p style={{
+                    fontSize: '32px',
+                    fontWeight: '900',
+                    margin: 0,
+                    color: theme.primary
+                  }}>
+                    {best1RM}kg
+                  </p>
+                </div>
+
+                <div style={{
+                  background: theme.secondaryAlpha,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  border: `2px solid ${theme.secondary}`
+                }}>
+                  <p style={{
+                    fontSize: '14px',
+                    color: theme.secondary,
+                    margin: '0 0 8px 0',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    Charge Max
+                  </p>
+                  <p style={{
+                    fontSize: '32px',
+                    fontWeight: '900',
+                    margin: 0,
+                    color: theme.secondary
+                  }}>
+                    {maxWeight}kg
+                  </p>
+                </div>
+              </div>
+
+              <h3 style={{
+                fontSize: '20px',
+                fontWeight: '900',
+                margin: '0 0 24px 0',
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+              }}>
+                Historique ({performances.length} séance{performances.length > 1 ? 's' : ''})
+              </h3>
+
+              <div style={{ display: 'grid', gap: '16px' }}>
+                {performances.map((perf, idx) => {
+                  const maxWeightInPerf = Math.max(...perf.sets.map(s => s.weight));
+                  
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        background: theme.bgSecondary,
+                        borderRadius: '16px',
+                        padding: '24px',
+                        border: `2px solid ${theme.borderPrimary}`
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '16px'
+                      }}>
+                        <div>
+                          <p style={{
+                            fontSize: '16px',
+                            fontWeight: '900',
+                            margin: '0 0 4px 0',
+                            color: theme.textPrimary
+                          }}>
+                            {perf.date}
+                          </p>
+                          <p style={{
+                            fontSize: '14px',
+                            color: theme.textSecondary,
+                            margin: 0,
+                            fontWeight: '600'
+                          }}>
+                            {perf.sessionName}
+                          </p>
+                        </div>
+                        <div style={{
+                          background: theme.primaryAlpha,
+                          color: theme.primary,
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '900'
+                        }}>
+                          {perf.sets.length} séries
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gap: '8px' }}>
+                        {perf.sets.map((set, setIdx) => {
+                          const rm = calculate1RM(set.weight, set.reps);
+                          const isMax = set.weight === maxWeightInPerf;
+                          
+                          return (
+                            <div
+                              key={setIdx}
+                              style={{
+                                background: isMax ? theme.primaryAlpha : theme.bgTertiary,
+                                padding: '12px',
+                                borderRadius: '8px',
+                                border: `1px solid ${isMax ? theme.primary : theme.borderPrimary}`,
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <div>
+                                <span style={{
+                                  fontSize: '16px',
+                                  fontWeight: '900',
+                                  color: theme.textPrimary
+                                }}>
+                                  {set.reps} × {set.weight}kg
+                                </span>
+                                <span style={{
+                                  fontSize: '14px',
+                                  color: theme.textSecondary,
+                                  marginLeft: '12px',
+                                  fontWeight: '600'
+                                }}>
+                                  1RM: {rm}kg
+                                </span>
+                                {set.note && (
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    marginTop: '8px',
+                                    padding: '6px 10px',
+                                    background: theme.secondaryAlpha,
+                                    borderRadius: '6px',
+                                    border: `1px solid ${theme.secondary}`
+                                  }}>
+                                    <Icon name="messageSquare" size={12} color={theme.secondary} />
+                                    <span style={{
+                                      fontSize: '12px',
+                                      color: theme.secondary,
+                                      fontWeight: '600',
+                                      fontStyle: 'italic'
+                                    }}>
+                                      {set.note}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              {isMax && (
+                                <span style={{
+                                  fontSize: '20px'
+                                }}>
+                                  👑
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // ============================================
+    // ADD WORKOUT MODAL
+    // ============================================
+
+    function AddWorkoutModal({ workout, exerciseLibrary, onSave, onClose, theme }) {
+      const [workoutName, setWorkoutName] = useState(workout?.name || '');
+      const [exercises, setExercises] = useState(workout?.exercises || []);
+
+      const addExercise = () => {
+        setExercises([...exercises, {
+          name: '',
+          sets: '',
+          reps: '',
+          weight: '',
+          restTime: '',
+          type: 'normal'
+        }]);
+      };
+
+      const removeExercise = (index) => {
+        setExercises(exercises.filter((_, i) => i !== index));
+      };
+
+      const updateExercise = (index, field, value) => {
+        const newExercises = [...exercises];
+        newExercises[index] = {
+          ...newExercises[index],
+          [field]: field === 'name' || field === 'type' ? value : Number(value) || 0
+        };
+        setExercises(newExercises);
+      };
+
+      const updateDropsetWeights = (index, weightsStr) => {
+        const weights = weightsStr.split(',').map(w => parseFloat(w.trim())).filter(w => !isNaN(w));
+        const newExercises = [...exercises];
+        newExercises[index] = {
+          ...newExercises[index],
+          dropsetWeights: weights
+        };
+        setExercises(newExercises);
+      };
+
+      const handleSave = () => {
+        if (!workoutName.trim() || exercises.length === 0) {
+          alert('Ajoute un nom et au moins un exercice !');
+          return;
+        }
+        
+        const hasEmptyExercise = exercises.some(ex => !ex.name.trim());
+        if (hasEmptyExercise) {
+          alert('Tous les exercices doivent avoir un nom !');
+          return;
+        }
+
+        onSave({
+          name: workoutName,
+          exercises: exercises.map(ex => ({
+            ...ex,
+            id: workout ? ex.id : undefined
+          }))
+        });
+      };
+
+      return (
+        <>
+          <div 
+            onClick={onClose}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.9)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 9998,
+              animation: 'fadeIn 0.2s'
+            }}
+          />
+          
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: theme.bgPrimary,
+            borderRadius: '24px',
+            padding: '32px',
+            zIndex: 9999,
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.7)',
+            border: `3px solid ${theme.primary}`,
+            animation: 'slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '24px'
+            }}>
+              <h2 style={{
+                fontSize: '28px',
+                fontWeight: '900',
+                margin: 0,
+                textTransform: 'uppercase',
+                letterSpacing: '-0.5px'
+              }}>
+                {workout ? 'Éditer' : 'Nouveau'} Programme
+              </h2>
+              <button
+                onClick={onClose}
+                style={{
+                  background: theme.bgSecondary,
+                  border: `2px solid ${theme.borderSecondary}`,
+                  borderRadius: '8px',
+                  padding: '8px',
+                  color: theme.textPrimary,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+                onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+              >
+                <Icon name="x" size={20} strokeWidth={3} />
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '700',
+                marginBottom: '8px',
+                color: theme.textSecondary,
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+              }}>
+                Nom du programme
+              </label>
+              <input
+                type="text"
+                value={workoutName}
+                onChange={(e) => setWorkoutName(e.target.value)}
+                placeholder="ex: Push Day"
+                style={{
+                  width: '100%',
+                  background: theme.bgSecondary,
+                  border: `2px solid ${theme.borderSecondary}`,
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: theme.textPrimary,
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px'
+              }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '900',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  Exercices
+                </h3>
+                <button
+                  onClick={addExercise}
+                  style={{
+                    background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    color: '#000',
+                    fontSize: '14px',
+                    fontWeight: '900',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                >
+                  <Icon name="plus" size={16} strokeWidth={3} />
+                  Ajouter
+                </button>
+              </div>
+
+              {exercises.length === 0 ? (
+                <div style={{
+                  background: theme.bgTertiary,
+                  borderRadius: '12px',
+                  padding: '24px',
+                  textAlign: 'center',
+                  border: `2px dashed ${theme.borderPrimary}`
+                }}>
+                  <p style={{
+                    fontSize: '16px',
+                    color: theme.textSecondary,
+                    margin: 0
+                  }}>
+                    Aucun exercice. Clique sur "Ajouter" !
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gap: '16px' }}>
+                  {exercises.map((exercise, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        background: theme.bgTertiary,
+                        borderRadius: '12px',
+                        padding: '16px',
+                        border: `2px solid ${theme.borderPrimary}`
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '12px'
+                      }}>
+                        <span style={{
+                          fontSize: '14px',
+                          fontWeight: '900',
+                          color: theme.primary,
+                          textTransform: 'uppercase'
+                        }}>
+                          Exercice {index + 1}
+                        </span>
+                        <button
+                          onClick={() => removeExercise(index)}
+                          style={{
+                            background: theme.dangerAlpha,
+                            border: `2px solid ${theme.danger}`,
+                            borderRadius: '6px',
+                            padding: '4px',
+                            color: theme.danger,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = theme.danger;
+                            e.target.style.color = '#fff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = theme.dangerAlpha;
+                            e.target.style.color = theme.danger;
+                          }}
+                        >
+                          <Icon name="trash" size={14} strokeWidth={2.5} />
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'grid', gap: '12px' }}>
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            marginBottom: '6px',
+                            color: theme.textSecondary,
+                            textTransform: 'uppercase'
+                          }}>
+                            Type
+                          </label>
+                          <select
+                            value={exercise.type || 'normal'}
+                            onChange={(e) => updateExercise(index, 'type', e.target.value)}
+                            style={{
+                              width: '100%',
+                              background: theme.bgSecondary,
+                              border: `2px solid ${theme.borderPrimary}`,
+                              borderRadius: '8px',
+                              padding: '12px',
+                              color: theme.textPrimary,
+                              fontSize: '16px',
+                              fontWeight: '600',
+                              fontFamily: 'inherit',
+                              boxSizing: 'border-box',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value="normal" style={{color: '#000'}}>⚪ Normal</option>
+                            <option value="superset" style={{color: '#000'}}>🔗 Superset</option>
+                            <option value="dropset" style={{color: '#000'}}>📉 Dropset</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            marginBottom: '6px',
+                            color: theme.textSecondary,
+                            textTransform: 'uppercase'
+                          }}>
+                            Nom
+                          </label>
+                          <input
+                            type="text"
+                            value={exercise.name}
+                            onChange={(e) => updateExercise(index, 'name', e.target.value)}
+                            list={`exercise-list-${index}`}
+                            placeholder="ex: Développé couché"
+                            style={{
+                              width: '100%',
+                              background: theme.bgSecondary,
+                              border: `2px solid ${theme.borderPrimary}`,
+                              borderRadius: '8px',
+                              padding: '12px',
+                              color: theme.textPrimary,
+                              fontSize: '16px',
+                              fontWeight: '600',
+                              fontFamily: 'inherit',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                          <datalist id={`exercise-list-${index}`}>
+                            {exerciseLibrary.map((ex, i) => (
+                              <option key={i} value={ex} />
+                            ))}
+                          </datalist>
+                        </div>
+
+                        {exercise.type === 'dropset' && (
+                          <div>
+                            <label style={{
+                              display: 'block',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              marginBottom: '6px',
+                              color: theme.textSecondary,
+                              textTransform: 'uppercase'
+                            }}>
+                              Poids Dropset (kg, séparés par virgule)
+                            </label>
+                            <input
+                              type="text"
+                              value={exercise.dropsetWeights?.join(', ') || ''}
+                              onChange={(e) => updateDropsetWeights(index, e.target.value)}
+                              placeholder="ex: 50, 45, 40"
+                              style={{
+                                width: '100%',
+                                background: theme.bgSecondary,
+                                border: `2px solid ${theme.borderPrimary}`,
+                                borderRadius: '8px',
+                                padding: '12px',
+                                color: theme.textPrimary,
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                fontFamily: 'inherit',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr',
+                          gap: '12px'
+                        }}>
+                          <div>
+                            <label style={{
+                              display: 'block',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              marginBottom: '6px',
+                              color: theme.textSecondary,
+                              textTransform: 'uppercase'
+                            }}>
+                              Séries
+                            </label>
+                            <input
+                              type="number"
+                              value={exercise.sets}
+                              onChange={(e) => updateExercise(index, 'sets', e.target.value)}
+                              placeholder="3"
+                              min="1"
+                              style={{
+                                width: '100%',
+                                background: theme.bgSecondary,
+                                border: `2px solid ${theme.borderPrimary}`,
+                                borderRadius: '8px',
+                                padding: '12px',
+                                color: theme.textPrimary,
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                fontFamily: 'inherit',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                          </div>
+
+                          <div>
+                            <label style={{
+                              display: 'block',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              marginBottom: '6px',
+                              color: theme.textSecondary,
+                              textTransform: 'uppercase'
+                            }}>
+                              Reps
+                            </label>
+                            <input
+                              type="number"
+                              value={exercise.reps}
+                              onChange={(e) => updateExercise(index, 'reps', e.target.value)}
+                              placeholder="10"
+                              min="1"
+                              style={{
+                                width: '100%',
+                                background: theme.bgSecondary,
+                                border: `2px solid ${theme.borderPrimary}`,
+                                borderRadius: '8px',
+                                padding: '12px',
+                                color: theme.textPrimary,
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                fontFamily: 'inherit',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr',
+                          gap: '12px'
+                        }}>
+                          <div>
+                            <label style={{
+                              display: 'block',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              marginBottom: '6px',
+                              color: theme.textSecondary,
+                              textTransform: 'uppercase'
+                            }}>
+                              Poids (kg)
+                            </label>
+                            <input
+                              type="number"
+                              value={exercise.weight}
+                              onChange={(e) => updateExercise(index, 'weight', e.target.value)}
+                              placeholder="50"
+                              min="0"
+                              step="0.5"
+                              style={{
+                                width: '100%',
+                                background: theme.bgSecondary,
+                                border: `2px solid ${theme.borderPrimary}`,
+                                borderRadius: '8px',
+                                padding: '12px',
+                                color: theme.textPrimary,
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                fontFamily: 'inherit',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                          </div>
+
+                          <div>
+                            <label style={{
+                              display: 'block',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              marginBottom: '6px',
+                              color: theme.textSecondary,
+                              textTransform: 'uppercase'
+                            }}>
+                              Repos (s)
+                            </label>
+                            <input
+                              type="number"
+                              value={exercise.restTime}
+                              onChange={(e) => updateExercise(index, 'restTime', e.target.value)}
+                              placeholder="90"
+                              min="0"
+                              step="15"
+                              style={{
+                                width: '100%',
+                                background: theme.bgSecondary,
+                                border: `2px solid ${theme.borderPrimary}`,
+                                borderRadius: '8px',
+                                padding: '12px',
+                                color: theme.textPrimary,
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                fontFamily: 'inherit',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 2fr',
+              gap: '12px'
+            }}>
+              <button
+                onClick={onClose}
+                style={{
+                  background: theme.bgSecondary,
+                  border: `2px solid ${theme.borderSecondary}`,
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: theme.textPrimary,
+                  fontSize: '16px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}
+                onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+                onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+              >
+                Annuler
+              </button>
+
+              <button
+                onClick={handleSave}
+                style={{
+                  background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: '#000',
+                  fontSize: '16px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  boxShadow: `0 8px 24px ${theme.primaryAlpha}`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                }}
+              >
+                {workout ? 'Sauvegarder' : 'Créer'}
+              </button>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // ============================================
+    // SETTINGS MODAL
+    // ============================================
+
+    function SettingsModal({ settings, onSave, onClose, theme }) {
+      const [enabled, setEnabled] = useState(settings?.sounds?.enabled ?? true);
+      const [volume, setVolume] = useState(settings?.sounds?.volume ?? 50);
+      const [selectedTheme, setSelectedTheme] = useState(settings?.theme || 'neon');
+
+      const handleSave = () => {
+        onSave({
+          sounds: { enabled, volume },
+          theme: selectedTheme
+        });
+        onClose();
+      };
+
+      return (
+        <>
+          <div 
+            onClick={onClose}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.9)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 9998,
+              animation: 'fadeIn 0.2s'
+            }}
+          />
+          
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: theme.bgPrimary,
+            borderRadius: '24px',
+            padding: '32px',
+            zIndex: 9999,
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.7)',
+            border: `3px solid ${theme.primary}`,
+            animation: 'slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '24px'
+            }}>
+              <h2 style={{
+                fontSize: '28px',
+                fontWeight: '900',
+                margin: 0,
+                textTransform: 'uppercase',
+                letterSpacing: '-0.5px'
+              }}>
+                Paramètres
+              </h2>
+              <button
+                onClick={onClose}
+                style={{
+                  background: theme.bgSecondary,
+                  border: `2px solid ${theme.borderSecondary}`,
+                  borderRadius: '8px',
+                  padding: '8px',
+                  color: theme.textPrimary,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+                onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+              >
+                <Icon name="x" size={20} strokeWidth={3} />
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '32px' }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '900',
+                marginBottom: '16px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                Thème
+              </h3>
+
+              <select
+                value={selectedTheme}
+                onChange={(e) => setSelectedTheme(e.target.value)}
+                style={{
+                  width: '100%',
+                  background: theme.bgSecondary,
+                  border: `2px solid ${theme.borderSecondary}`,
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: theme.textPrimary,
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  marginBottom: '16px'
+                }}
+              >
+                <option value="neon" style={{color: '#000'}}>🌟 Néon</option>
+                <option value="classic" style={{color: '#000'}}>💼 Classique</option>
+                <option value="light" style={{color: '#000'}}>☀️ Clair</option>
+                <option value="dark" style={{color: '#000'}}>🌑 Sombre</option>
+              </select>
+
+              <p style={{
+                fontSize: '14px',
+                color: theme.textSecondary,
+                margin: 0,
+                fontStyle: 'italic'
+              }}>
+                Le thème sera appliqué immédiatement
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '32px' }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '900',
+                marginBottom: '16px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                Sons
+              </h3>
+
+              <div style={{
+                background: theme.bgTertiary,
+                borderRadius: '12px',
+                padding: '20px',
+                border: `2px solid ${theme.borderPrimary}`,
+                marginBottom: '16px'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: enabled ? '20px' : '0'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Icon name={enabled ? 'volume' : 'volumeX'} size={24} color={enabled ? theme.primary : theme.danger} />
+                    <span style={{
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      color: theme.textPrimary
+                    }}>
+                      Activer les sons
+                    </span>
+                  </div>
+                  
+                  <button
+                    onClick={() => setEnabled(!enabled)}
+                    style={{
+                      background: enabled ? `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)` : theme.dangerAlpha,
+                      border: 'none',
+                      borderRadius: '20px',
+                      padding: '4px',
+                      width: '60px',
+                      height: '32px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      position: 'relative'
+                    }}
+                  >
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      background: '#fff',
+                      borderRadius: '50%',
+                      transition: 'transform 0.2s',
+                      transform: enabled ? 'translateX(28px)' : 'translateX(0)'
+                    }} />
+                  </button>
+                </div>
+
+                {enabled && (
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      marginBottom: '12px',
+                      color: theme.textSecondary,
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px'
+                    }}>
+                      Volume: {volume}%
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={volume}
+                      onChange={(e) => setVolume(Number(e.target.value))}
+                      style={{
+                        width: '100%',
+                        height: '8px',
+                        borderRadius: '4px',
+                        background: `linear-gradient(to right, ${theme.primary} 0%, ${theme.primary} ${volume}%, ${theme.bgSecondary} ${volume}%, ${theme.bgSecondary} 100%)`,
+                        outline: 'none',
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <p style={{
+                fontSize: '14px',
+                color: theme.textSecondary,
+                margin: 0,
+                fontStyle: 'italic'
+              }}>
+                Sons joués : fin de repos (3 bips), validation de série (click)
+              </p>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 2fr',
+              gap: '12px'
+            }}>
+              <button
+                onClick={onClose}
+                style={{
+                  background: theme.bgSecondary,
+                  border: `2px solid ${theme.borderSecondary}`,
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: theme.textPrimary,
+                  fontSize: '16px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}
+                onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+                onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+              >
+                Annuler
+              </button>
+
+              <button
+                onClick={handleSave}
+                style={{
+                  background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: '#000',
+                  fontSize: '16px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  boxShadow: `0 8px 24px ${theme.primaryAlpha}`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                }}
+              >
+                Sauvegarder
+              </button>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // ============================================
+    // CONFIRM DELETE MODAL
+    // ============================================
+
+    function ConfirmDeleteModal({ workout, onConfirm, onCancel, theme }) {
+      return (
+        <>
+          <div 
+            onClick={onCancel}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.9)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 9998,
+              animation: 'fadeIn 0.2s'
+            }}
+          />
+          
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: theme.bgPrimary,
+            borderRadius: '24px',
+            padding: '32px',
+            zIndex: 9999,
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.7)',
+            border: `3px solid ${theme.danger}`,
+            animation: 'slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '900',
+              color: theme.danger,
+              margin: '0 0 16px 0',
+              textAlign: 'center',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Supprimer ?
+            </h2>
+            
+            <p style={{
+              fontSize: '16px',
+              color: theme.textSecondary,
+              margin: '0 0 24px 0',
+              textAlign: 'center',
+              lineHeight: '1.5'
+            }}>
+              Es-tu sûr de vouloir supprimer <span style={{ color: theme.textPrimary, fontWeight: '900' }}>"{workout.name}"</span> ? Cette action est irréversible.
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '12px'
+            }}>
+              <button
+                onClick={onCancel}
+                style={{
+                  background: theme.bgSecondary,
+                  border: `2px solid ${theme.borderSecondary}`,
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: theme.textPrimary,
+                  fontSize: '16px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}
+                onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+                onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+              >
+                Annuler
+              </button>
+
+              <button
+                onClick={onConfirm}
+                style={{
+                  background: `linear-gradient(135deg, ${theme.danger} 0%, ${theme.danger} 100%)`,
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: '#fff',
+                  fontSize: '16px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  boxShadow: `0 8px 24px ${theme.dangerAlpha}`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                }}
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // ============================================
+    // NOTE MODAL
+    // ============================================
+
+    function NoteModal({ onSubmit, onCancel, theme }) {
+      const [note, setNote] = useState('');
+
+      return (
+        <>
+          <div 
+            onClick={onCancel}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.9)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 9998,
+              animation: 'fadeIn 0.2s'
+            }}
+          />
+          
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: theme.bgPrimary,
+            borderRadius: '24px',
+            padding: '32px',
+            zIndex: 9999,
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.7)',
+            border: `3px solid ${theme.secondary}`,
+            animation: 'slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '900',
+              margin: '0 0 16px 0',
+              textAlign: 'center',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              color: theme.secondary
+            }}>
+              Ajouter une note ?
+            </h2>
+            
+            <p style={{
+              fontSize: '14px',
+              color: theme.textSecondary,
+              margin: '0 0 16px 0',
+              textAlign: 'center'
+            }}>
+              (optionnel)
+            </p>
+
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="ex: Douleur à l'épaule, Trop facile, Forme parfaite..."
+              maxLength={200}
+              style={{
+                width: '100%',
+                height: '100px',
+                background: theme.bgSecondary,
+                border: `2px solid ${theme.borderSecondary}`,
+                borderRadius: '12px',
+                padding: '16px',
+                color: theme.textPrimary,
+                fontSize: '16px',
+                fontWeight: '600',
+                fontFamily: 'inherit',
+                boxSizing: 'border-box',
+                resize: 'none',
+                marginBottom: '8px'
+              }}
+            />
+            
+            <p style={{
+              fontSize: '12px',
+              color: theme.textSecondary,
+              margin: '0 0 24px 0',
+              textAlign: 'right'
+            }}>
+              {note.length}/200
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 2fr',
+              gap: '12px'
+            }}>
+              <button
+                onClick={onCancel}
+                style={{
+                  background: theme.bgSecondary,
+                  border: `2px solid ${theme.borderSecondary}`,
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: theme.textPrimary,
+                  fontSize: '16px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}
+                onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+                onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+              >
+                Skip
+              </button>
+
+              <button
+                onClick={() => onSubmit(note)}
+                style={{
+                  background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  color: '#000',
+                  fontSize: '16px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  boxShadow: `0 8px 24px ${theme.primaryAlpha}`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                }}
+              >
+                Valider
+              </button>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // ============================================
+    // SUGGESTIONS MODAL
+    // ============================================
+
+    function SuggestionsModal({ suggestions, onApply, onClose, theme }) {
+      return (
+        <>
+          <div 
+            onClick={onClose}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.9)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 9998,
+              animation: 'fadeIn 0.2s'
+            }}
+          />
+          
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: theme.bgPrimary,
+            borderRadius: '24px',
+            padding: '32px',
+            zIndex: 9999,
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.7)',
+            border: `3px solid ${theme.secondary}`,
+            animation: 'slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '24px'
+            }}>
+              <h2 style={{
+                fontSize: '28px',
+                fontWeight: '900',
+                margin: 0,
+                textTransform: 'uppercase',
+                letterSpacing: '-0.5px',
+                color: theme.secondary
+              }}>
+                💡 Suggestions
+              </h2>
+              <button
+                onClick={onClose}
+                style={{
+                  background: theme.bgSecondary,
+                  border: `2px solid ${theme.borderSecondary}`,
+                  borderRadius: '8px',
+                  padding: '8px',
+                  color: theme.textPrimary,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = theme.bgTertiary}
+                onMouseLeave={(e) => e.target.style.background = theme.bgSecondary}
+              >
+                <Icon name="x" size={20} strokeWidth={3} />
+              </button>
+            </div>
+
+            {suggestions.length === 0 ? (
+              <div style={{
+                background: theme.bgTertiary,
+                borderRadius: '16px',
+                padding: '48px',
+                textAlign: 'center',
+                border: `2px dashed ${theme.borderPrimary}`
+              }}>
+                <p style={{ fontSize: '18px', color: theme.textSecondary, margin: 0 }}>
+                  Aucune suggestion pour le moment. Continue à t'entraîner !
+                </p>
+              </div>
+            ) : (
+              <>
+                <p style={{
+                  fontSize: '16px',
+                  color: theme.textSecondary,
+                  margin: '0 0 24px 0',
+                  lineHeight: '1.5'
+                }}>
+                  Basé sur tes 3 dernières séances, voici les exercices où tu peux progresser :
+                </p>
+
+                <div style={{ display: 'grid', gap: '16px' }}>
+                  {suggestions.map((suggestion, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        background: theme.bgSecondary,
+                        borderRadius: '16px',
+                        padding: '24px',
+                        border: `2px solid ${theme.borderPrimary}`
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'start',
+                        marginBottom: '16px'
+                      }}>
+                        <div>
+                          <h3 style={{
+                            fontSize: '20px',
+                            fontWeight: '900',
+                            margin: '0 0 4px 0',
+                            textTransform: 'uppercase'
+                          }}>
+                            {suggestion.exerciseName}
+                          </h3>
+                          <p style={{
+                            fontSize: '14px',
+                            color: theme.textSecondary,
+                            margin: 0,
+                            fontWeight: '600'
+                          }}>
+                            {suggestion.workoutName}
+                          </p>
+                        </div>
+                        <div style={{
+                          background: theme.primaryAlpha,
+                          color: theme.primary,
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '900',
+                          textTransform: 'uppercase'
+                        }}>
+                          3/3 ✓
+                        </div>
+                      </div>
+
+                      <div style={{
+                        background: theme.bgTertiary,
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '16px'
+                      }}>
+                        <p style={{
+                          fontSize: '14px',
+                          color: theme.textSecondary,
+                          margin: '0 0 8px 0',
+                          fontWeight: '700',
+                          textTransform: 'uppercase'
+                        }}>
+                          Actuellement
+                        </p>
+                        <p style={{
+                          fontSize: '18px',
+                          fontWeight: '900',
+                          margin: 0,
+                          color: theme.textPrimary
+                        }}>
+                          {suggestion.currentReps} reps × {suggestion.currentWeight}kg
+                        </p>
+                      </div>
+
+                      <div style={{
+                        background: theme.secondaryAlpha,
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '16px',
+                        border: `2px solid ${theme.secondary}`
+                      }}>
+                        <p style={{
+                          fontSize: '14px',
+                          color: theme.secondary,
+                          margin: '0 0 8px 0',
+                          fontWeight: '700',
+                          textTransform: 'uppercase'
+                        }}>
+                          💪 Suggestion
+                        </p>
+                        <p style={{
+                          fontSize: '18px',
+                          fontWeight: '900',
+                          margin: 0,
+                          color: theme.secondary
+                        }}>
+                          {suggestion.suggestion.type === 'weight' 
+                            ? `${suggestion.currentReps} reps × ${suggestion.suggestion.value}kg`
+                            : `${suggestion.suggestion.value} reps × ${suggestion.currentWeight}kg`
+                          }
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => onApply(suggestion)}
+                        style={{
+                          width: '100%',
+                          background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary} 100%)`,
+                          border: 'none',
+                          borderRadius: '12px',
+                          padding: '16px',
+                          color: '#000',
+                          fontSize: '16px',
+                          fontWeight: '900',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                          boxShadow: `0 8px 24px ${theme.primaryAlpha}`
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        ⚡ Appliquer
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      );
+    }
+
+    // ============================================
+    // ANIMATIONS & STYLES
+    // ============================================
+
+    const GlobalStyles = () => (
+      <style>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes slideUpModal {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.02); }
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          background: var(--primary, #00FFA3);
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 255, 163, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          background: var(--primary, #00FFA3);
+          border-radius: 50%;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 2px 8px rgba(0, 255, 163, 0.5);
+        }
+      `}</style>
+    );
+
+    // ============================================
+    // INITIALISATION
+    // ============================================
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
+      <>
+        <GlobalStyles />
+        <FitnessTracker />
+      </>
+    );
+  </script>
+</body>
+</html>
